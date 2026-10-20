@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 200" role="img" aria-label="나무 그림">
+  <rect width="240" height="200" fill="#26272b"/>
+  <rect x="0" y="168" width="240" height="32" fill="#3a3c42"/>
+  <path d="M112 120 h16 v52 h-16z" fill="#7a5233"/>
+  <path d="M120 140 l-18 -16 M120 134 l16 -14" stroke="#7a5233" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="120" cy="80" r="46" fill="#2f8f5b"/>
+  <circle cx="86" cy="98" r="30" fill="#3aa66a"/>
+  <circle cx="154" cy="98" r="30" fill="#3aa66a"/>
+  <circle cx="104" cy="58" r="26" fill="#45b877"/>
+  <circle cx="140" cy="60" r="24" fill="#3fa999"/>
+  <circle cx="120" cy="104" r="26" fill="#349a63"/>
+  <text x="120" y="190" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#e6e6e6">I HATE GRASS</text>
+</svg>
