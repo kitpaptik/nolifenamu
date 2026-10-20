@@ -5,8 +5,8 @@
 export const CONFIG = {
   siteName: 'no life krew wiki',
   github: {
-    owner: '', // 예: 'nolifecrew'
-    repo: '', // 예: 'nolifecrew-wiki'
+    owner: 'kitpaptik',
+    repo: 'nolifenamu',
     branch: 'main',
   },
   frontPage: '대문',
