@@ -1,0 +1,72 @@
+/* 색상·타이포 토큰. 다크가 기본 (예시 스크린샷 기준), data-theme="light"로 전환 */
+:root {
+  --bg: #1e1f22;
+  --surface: #2b2c31;
+  --surface-2: #33353b;
+  --surface-hover: #35373d;
+  --header-bg: #2b2c31;
+  --header-text: #e6e6e6;
+  --logo: #3fa999;
+  --border: #3a3c42;
+  --border-soft: #34363c;
+  --text: #e6e6e6;
+  --text-strong: #ffffff;
+  --text-muted: #a9abb0;
+  --accent: #3fa999;
+  --accent-strong: #52c2b0;
+  --link: #4fb8a7;
+  --link-missing: #ef6b63;
+  --link-external: #5aa7e6;
+  --go: #3aa66a;
+  --go-hover: #33955f;
+  --btn-light-bg: #f4f4f4;
+  --btn-light-border: #d6d6d6;
+  --input-bg: #18191c;
+  --code-bg: #232428;
+  --quote-bg: #26272b;
+  --quote-border: #3fa999;
+  --tooltip-bg: #3a3c42;
+  --table-border: #4a4c53;
+  --diff-add: rgba(63, 185, 80, 0.2);
+  --diff-del: rgba(248, 81, 73, 0.2);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --radius: 6px;
+  --font: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR",
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SFMono-Regular", Menlo, Consolas, "D2Coding", monospace;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f5f6f7;
+  --surface: #ffffff;
+  --surface-2: #f3f4f5;
+  --surface-hover: #eef0f1;
+  --header-bg: #00a495;
+  --header-text: #ffffff;
+  --logo: #ffffff;
+  --border: #dcdfe2;
+  --border-soft: #e7e9eb;
+  --text: #212529;
+  --text-strong: #111111;
+  --text-muted: #6c757d;
+  --accent: #00a495;
+  --accent-strong: #008275;
+  --link: #0275d8;
+  --link-missing: #d9534f;
+  --link-external: #0b7ac5;
+  --go: #00a495;
+  --go-hover: #008e81;
+  --btn-light-bg: #ffffff;
+  --btn-light-border: #ccd0d4;
+  --input-bg: #ffffff;
+  --code-bg: #f3f4f5;
+  --quote-bg: #f8f9fa;
+  --quote-border: #71bc6d;
+  --tooltip-bg: #ffffff;
+  --table-border: #cccccc;
+  --diff-add: rgba(46, 160, 67, 0.15);
+  --diff-del: rgba(248, 81, 73, 0.15);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  color-scheme: light;
+}

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>no life krew wiki</title>
+    <meta name="description" content="nolifecrew 친구들을 위한 나무위키 스타일 위키" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>"
+    />
+    <script>
+      // 첫 페인트 전에 테마를 적용해 깜빡임을 막는다
+      try {
+        const t = localStorage.getItem("theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/theme.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/wiki.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="logo" href="#/"><span class="logo-icon">🌳</span><span class="logo-text">no life krew wiki</span></a>
+        <nav class="header-nav" aria-label="주요 메뉴">
+          <a href="#/recent">🕘 최근 변경</a>
+          <a href="#/random">🎲 랜덤</a>
+          <a href="#/all">📚 모든 문서</a>
+          <a href="#/w/%EB%AC%B8%EB%B2%95%20%EB%8F%84%EC%9B%80%EB%A7%90">❓ 도움말</a>
+        </nav>
+        <form class="header-search" id="header-search" role="search" autocomplete="off">
+          <input type="search" name="q" placeholder="문서 검색" aria-label="문서 검색" />
+          <button type="submit" aria-label="검색">🔍</button>
+        </form>
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="테마 전환">🌙</button>
+      </div>
+    </header>
+
+    <div class="site-container">
+      <main id="main" class="site-main"><div class="loading">불러오는 중…</div></main>
+      <aside id="sidebar" class="site-sidebar" aria-label="사이드바"></aside>
+    </div>
+
+    <footer class="site-footer">
+      nolifecrew wiki · 문서는 GitHub 저장소의 <code>wiki/</code> 폴더에 저장됩니다
+    </footer>
+
+    <div id="toast" class="toast" role="status" hidden></div>
+
+    <script type="module" src="assets/js/app.js"></script>
+  </body>
+</html>
