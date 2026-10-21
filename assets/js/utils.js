@@ -50,6 +50,20 @@ export function debounce(fn, ms) {
   });
 }
 
+/**
+ * git이 파일 내용을 식별하는 blob sha1. 저장 API가 편집 충돌을 감지하는 데 쓴다.
+ * @param {string} text
+ */
+export async function gitBlobSha(text) {
+  const body = new TextEncoder().encode(text);
+  const head = new TextEncoder().encode(`blob ${body.length}\0`);
+  const buf = new Uint8Array(head.length + body.length);
+  buf.set(head);
+  buf.set(body, head.length);
+  const digest = await crypto.subtle.digest('SHA-1', buf);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 /** localStorage는 사생활 보호 모드 등에서 예외를 던질 수 있으므로 감싼다 */
 export const storage = {
   /** @param {string} key */

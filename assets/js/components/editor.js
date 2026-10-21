@@ -1,14 +1,18 @@
-import { fetchSource, titleToPath } from '../store.js';
+import { fetchSource, titleToPath, rememberSaved } from '../store.js';
 import { CONFIG } from '../config.js';
 import { isConfigured, editFileUrl, newFileUrl } from '../github.js';
-import { escapeHtml as esc, debounce, storage, toast, formatDate } from '../utils.js';
+import { escapeHtml as esc, debounce, storage, toast, formatDate, docHref, gitBlobSha } from '../utils.js';
 import { pageHeader, renderWiki, enhance } from './viewer.js';
 
 /** GitHub 새 파일 URL에 내용을 담을 수 있는 대략적인 한도 */
 const MAX_PREFILL_URL = 7000;
 
+const AUTHOR_KEY = 'editor:author';
+const PASSWORD_KEY = 'editor:password';
+
 /**
- * 편집기. 저장은 GitHub 웹 편집기로 넘겨 커밋하는 방식 (Git 파일 기반 위키).
+ * 편집기. 저장은 /api/save 서버 함수가 GitHub에 커밋한다 (Git 파일 기반 위키).
+ * 서버 함수가 없는 환경(로컬 미리보기, GitHub Pages)에서는 GitHub 웹 편집기로 넘긴다.
  * @param {HTMLElement} view
  * @param {string} title
  */
@@ -36,21 +40,21 @@ export async function renderEditor(view, title) {
       </div>
       <textarea class="editor-area" spellcheck="false" aria-label="문서 내용"></textarea>
       <div class="editor-preview wiki-body" hidden></div>
+      <div class="editor-meta">
+        <input type="text" name="summary" maxlength="200" placeholder="편집 요약 (선택)" aria-label="편집 요약" />
+        <input type="text" name="author" maxlength="40" placeholder="이름" aria-label="편집자 이름" autocomplete="nickname" />
+        <input type="password" name="password" placeholder="편집 비밀번호" aria-label="편집 비밀번호" autocomplete="current-password" />
+      </div>
       <div class="editor-actions">
-        <button type="button" class="btn btn-go" data-act="save">💾 GitHub에 저장</button>
+        <button type="button" class="btn btn-go" data-act="save">💾 저장</button>
         <button type="button" class="btn" data-act="copy">📋 복사</button>
         <button type="button" class="btn" data-act="download">⬇️ .txt 다운로드</button>
         <a class="btn" href="#/w/${encodeURIComponent(title)}">취소</a>
         <span class="editor-status"></span>
       </div>
       <div class="notice" style="margin-top:16px">
-        <strong>저장 방법</strong> · 파일: <code>${esc(filePath)}</code><br />
-        ${
-          isNew
-            ? '"GitHub에 저장"을 누르면 내용이 채워진 GitHub 새 파일 화면이 열립니다. 아래의 <b>Commit changes</b>를 누르면 저장됩니다.'
-            : '"GitHub에 저장"을 누르면 내용이 복사되고 GitHub 편집 화면이 열립니다. 기존 내용을 전체 선택(⌘/Ctrl+A) 후 붙여넣기(⌘/Ctrl+V) → <b>Commit changes</b>.'
-        }
-        <br />커밋 후 1~2분 뒤 사이트에 반영됩니다. 문법은 <a href="#/w/${encodeURIComponent('문법 도움말')}">문법 도움말</a> 참고.
+        파일: <code>${esc(filePath)}</code> · 크루 편집 비밀번호를 넣고 <b>저장</b>(⌘/Ctrl+S)을 누르면 바로 저장됩니다.
+        다른 사람 화면에는 1분쯤 뒤 반영됩니다. 문법은 <a href="#/w/${encodeURIComponent('문법 도움말')}">문법 도움말</a> 참고.
       </div>
     </article>`;
 
@@ -58,7 +62,14 @@ export async function renderEditor(view, title) {
   const area = /** @type {HTMLTextAreaElement} */ ($('.editor-area'));
   const preview = $('.editor-preview');
   const status = $('.editor-status');
+  const field = (name) => /** @type {HTMLInputElement} */ (view.querySelector(`input[name="${name}"]`));
+  const summaryInput = field('summary');
+  const authorInput = field('author');
+  const passwordInput = field('password');
+  const saveBtn = /** @type {HTMLButtonElement} */ ($('[data-act="save"]'));
   area.value = initial;
+  authorInput.value = storage.get(AUTHOR_KEY) ?? '';
+  passwordInput.value = storage.get(PASSWORD_KEY) ?? '';
 
   const saveDraft = debounce(() => {
     if (area.value === (original ?? '')) storage.remove(draftKey);
@@ -108,16 +119,8 @@ export async function renderEditor(view, title) {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
 
-  const save = () => {
-    if (!isConfigured()) {
-      toast('GitHub 저장소가 설정되지 않아 .txt 파일로 내려받습니다.');
-      download();
-      return;
-    }
-    if (!isNew && area.value === original) {
-      toast('변경된 내용이 없습니다.');
-      return;
-    }
+  /** 서버 함수가 없을 때: GitHub 웹 편집기로 넘겨 직접 커밋 */
+  const saveViaGitHub = () => {
     if (isNew) {
       const url = newFileUrl(title, area.value);
       if (url.length <= MAX_PREFILL_URL) {
@@ -134,6 +137,68 @@ export async function renderEditor(view, title) {
         : '복사가 차단되었을 수 있습니다. "📋 복사" 버튼으로 다시 복사해 주세요.',
       8000,
     );
+  };
+
+  const save = async () => {
+    if (!isConfigured()) {
+      toast('GitHub 저장소가 설정되지 않아 .txt 파일로 내려받습니다.');
+      download();
+      return;
+    }
+    if (!isNew && area.value === original) {
+      toast('변경된 내용이 없습니다.');
+      return;
+    }
+    const author = authorInput.value.trim();
+    const password = passwordInput.value;
+    if (!author) return (toast('이름을 입력해 주세요.'), authorInput.focus());
+    if (!password) return (toast('편집 비밀번호를 입력해 주세요.'), passwordInput.focus());
+
+    saveBtn.disabled = true;
+    status.textContent = '저장 중…';
+    /** @type {Response | null} */
+    let res = null;
+    try {
+      res = await fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          content: area.value,
+          summary: summaryInput.value,
+          author,
+          password,
+          baseSha: original === null ? null : await gitBlobSha(original),
+        }),
+      });
+    } catch {
+      res = null;
+    }
+    saveBtn.disabled = false;
+    status.textContent = '';
+
+    if (!res || res.status === 404 || res.status === 405) {
+      toast('이 사이트에서는 바로 저장할 수 없어 GitHub 편집 화면으로 넘어갑니다.');
+      saveViaGitHub();
+      return;
+    }
+    /** @type {{ error?: string }} */
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 401) {
+        storage.remove(PASSWORD_KEY);
+        passwordInput.select();
+      }
+      toast(data.error ?? `저장에 실패했습니다 (${res.status}).`, 8000);
+      return;
+    }
+
+    storage.set(AUTHOR_KEY, author);
+    storage.set(PASSWORD_KEY, password);
+    storage.remove(draftKey);
+    rememberSaved(title, area.value, author);
+    toast('저장했습니다. 1분쯤 뒤 모두에게 반영됩니다.', 6000);
+    location.hash = docHref(title);
   };
 
   view.querySelector('[data-act="save"]')?.addEventListener('click', save);

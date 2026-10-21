@@ -384,6 +384,37 @@ h6.wiki-heading {
   border-radius: 4px;
 }
 
+.editor-meta {
+  display: grid;
+  grid-template-columns: 1fr 160px 160px;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.editor-meta input {
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  outline: none;
+}
+
+.editor-meta input:focus {
+  border-color: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .editor-meta {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .editor-meta input[name='summary'] {
+    grid-column: 1 / -1;
+  }
+}
+
 .editor-actions {
   display: flex;
   flex-wrap: wrap;

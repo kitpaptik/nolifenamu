@@ -48,6 +48,10 @@ export const pageExists = (title) => index.missing || Object.hasOwn(index.pages,
 
 export const allTitles = () => Object.keys(index.pages);
 
+/** 사이트 경로로 불러온 원문의 캐시 키 */
+/** @param {string} title */
+const sourceUrl = (title) => `${CONFIG.wikiDir}/${titleToPath(title).split('/').map(encodeURIComponent).join('/')}`;
+
 /**
  * 문서 원문을 가져온다. 없으면 null.
  * @param {string} title
@@ -55,8 +59,7 @@ export const allTitles = () => Object.keys(index.pages);
  * @returns {Promise<string|null>}
  */
 export function fetchSource(title, url) {
-  const target =
-    url ?? `${CONFIG.wikiDir}/${titleToPath(title).split('/').map(encodeURIComponent).join('/')}`;
+  const target = url ?? sourceUrl(title);
   if (!sourceCache.has(target)) {
     const p = fetch(target, { cache: url ? 'force-cache' : 'no-cache' })
       .then((r) => (r.ok ? r.text() : null))
@@ -64,4 +67,24 @@ export function fetchSource(title, url) {
     sourceCache.set(target, p);
   }
   return /** @type {Promise<string|null>} */ (sourceCache.get(target));
+}
+
+/**
+ * 방금 저장한 문서를 재배포 전에도 바로 보이도록 캐시와 인덱스에 반영한다.
+ * @param {string} title @param {string} content @param {string} author
+ */
+export function rememberSaved(title, content, author) {
+  sourceCache.set(sourceUrl(title), Promise.resolve(content));
+  if (index.missing || Object.hasOwn(index.pages, title)) return;
+  index.pages[title] = {
+    file: titleToPath(title),
+    updated: new Date().toISOString(),
+    author,
+    size: content.length,
+    links: [],
+    includes: [],
+    categories: [],
+    text: content.slice(0, 3000),
+    history: [],
+  };
 }
