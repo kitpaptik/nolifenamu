@@ -1,14 +1,12 @@
 import { fetchSource, titleToPath, rememberSaved } from '../store.js';
 import { CONFIG } from '../config.js';
 import { isConfigured, editFileUrl, newFileUrl } from '../github.js';
+import { callApi, savedCredentials, rememberCredentials, forgetPassword } from '../api.js';
 import { escapeHtml as esc, debounce, storage, toast, formatDate, docHref, gitBlobSha } from '../utils.js';
 import { pageHeader, renderWiki, enhance } from './viewer.js';
 
 /** GitHub 새 파일 URL에 내용을 담을 수 있는 대략적인 한도 */
 const MAX_PREFILL_URL = 7000;
-
-const AUTHOR_KEY = 'editor:author';
-const PASSWORD_KEY = 'editor:password';
 
 /**
  * 편집기. 저장은 /api/save 서버 함수가 GitHub에 커밋한다 (Git 파일 기반 위키).
@@ -68,8 +66,9 @@ export async function renderEditor(view, title) {
   const passwordInput = field('password');
   const saveBtn = /** @type {HTMLButtonElement} */ ($('[data-act="save"]'));
   area.value = initial;
-  authorInput.value = storage.get(AUTHOR_KEY) ?? '';
-  passwordInput.value = storage.get(PASSWORD_KEY) ?? '';
+  const credentials = savedCredentials();
+  authorInput.value = credentials.author;
+  passwordInput.value = credentials.password;
 
   const saveDraft = debounce(() => {
     if (area.value === (original ?? '')) storage.remove(draftKey);
@@ -156,45 +155,32 @@ export async function renderEditor(view, title) {
 
     saveBtn.disabled = true;
     status.textContent = '저장 중…';
-    /** @type {Response | null} */
-    let res = null;
-    try {
-      res = await fetch('/api/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          content: area.value,
-          summary: summaryInput.value,
-          author,
-          password,
-          baseSha: original === null ? null : await gitBlobSha(original),
-        }),
-      });
-    } catch {
-      res = null;
-    }
+    const res = await callApi('save', {
+      title,
+      content: area.value,
+      summary: summaryInput.value,
+      author,
+      password,
+      baseSha: original === null ? null : await gitBlobSha(original),
+    });
     saveBtn.disabled = false;
     status.textContent = '';
 
-    if (!res || res.status === 404 || res.status === 405) {
+    if (!res) {
       toast('이 사이트에서는 바로 저장할 수 없어 GitHub 편집 화면으로 넘어갑니다.');
       saveViaGitHub();
       return;
     }
-    /** @type {{ error?: string }} */
-    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       if (res.status === 401) {
-        storage.remove(PASSWORD_KEY);
+        forgetPassword();
         passwordInput.select();
       }
-      toast(data.error ?? `저장에 실패했습니다 (${res.status}).`, 8000);
+      toast(res.data.error ?? `저장에 실패했습니다 (${res.status}).`, 8000);
       return;
     }
 
-    storage.set(AUTHOR_KEY, author);
-    storage.set(PASSWORD_KEY, password);
+    rememberCredentials(author, password);
     storage.remove(draftKey);
     rememberSaved(title, area.value, author);
     toast('저장했습니다. 1분쯤 뒤 모두에게 반영됩니다.', 6000);

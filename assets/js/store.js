@@ -88,3 +88,10 @@ export function rememberSaved(title, content, author) {
     history: [],
   };
 }
+
+/** 방금 삭제한 문서를 재배포 전에도 없는 문서로 보이게 한다 */
+/** @param {string} title */
+export function forgetSource(title) {
+  sourceCache.set(sourceUrl(title), Promise.resolve(null));
+  if (!index.missing) delete index.pages[title];
+}

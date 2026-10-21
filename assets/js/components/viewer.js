@@ -59,10 +59,11 @@ const ACTIONS = [
   ['history', '🕘 역사'],
   ['backlink', '🔗 역링크'],
   ['discuss', '💬 토론'],
+  ['delete', '🗑️ 삭제'],
 ];
 
 /**
- * 문서 제목 + 우측 액션 버튼 (편집/역사/역링크/토론)
+ * 문서 제목 + 우측 액션 버튼 (편집/역사/역링크/토론/삭제)
  * @param {string} title
  * @param {string} [subtitle] 제목 옆 작은 글씨 (예: "편집")
  */

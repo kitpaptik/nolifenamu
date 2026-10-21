@@ -410,9 +410,17 @@ h6.wiki-heading {
     grid-template-columns: 1fr 1fr;
   }
 
-  .editor-meta input[name='summary'] {
+  .editor-meta input:first-child {
     grid-column: 1 / -1;
   }
+}
+
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.92rem;
 }
 
 .editor-actions {

@@ -12,6 +12,10 @@ export const repoUrl = () => `https://github.com/${owner}/${repo}`;
 export const editFileUrl = (title) =>
   `${repoUrl()}/edit/${branch}/${CONFIG.wikiDir}/${encodePath(titleToPath(title))}`;
 
+/** @param {string} title */
+export const deleteFileUrl = (title) =>
+  `${repoUrl()}/delete/${branch}/${CONFIG.wikiDir}/${encodePath(titleToPath(title))}`;
+
 /** GitHub 새 파일 화면은 filename/value 쿼리로 내용을 미리 채울 수 있다 */
 /** @param {string} title @param {string} [content] */
 export function newFileUrl(title, content) {

@@ -12,6 +12,7 @@ import { mountSearch, renderSearch } from './components/search.js';
 import { renderSidebar } from './components/sidebar.js';
 import { renderDocument } from './components/viewer.js';
 import { renderEditor } from './components/editor.js';
+import { renderDelete } from './components/delete.js';
 import { renderHistory } from './components/history.js';
 import { hideFootnote } from './components/footnote.js';
 import {
@@ -95,6 +96,10 @@ async function route() {
       case 'edit':
         setTitle(`${arg} (편집)`);
         await renderEditor(view, arg);
+        break;
+      case 'delete':
+        setTitle(`${arg} (삭제)`);
+        await renderDelete(view, arg);
         break;
       case 'history':
         setTitle(`${arg} (역사)`);

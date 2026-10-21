@@ -325,6 +325,18 @@ select {
   background: var(--go-hover);
 }
 
+.btn-danger {
+  background: var(--link-missing);
+  border-color: var(--link-missing);
+  color: #fff;
+  font-weight: 700;
+}
+
+.btn-danger:hover {
+  background: var(--link-missing);
+  filter: brightness(0.92);
+}
+
 .btn[disabled] {
   opacity: 0.5;
   cursor: not-allowed;
