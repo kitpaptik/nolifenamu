@@ -1,5 +1,14 @@
 import { CONFIG } from '../assets/js/config.js';
-import { reply, readAuthorized, github, currentSha, contentsPath, authorName, branch } from './_github.js';
+import {
+  reply,
+  readAuthorized,
+  guardProtection,
+  github,
+  currentSha,
+  contentsPath,
+  authorName,
+  branch,
+} from './_github.js';
 
 /**
  * 문서 삭제 API. 저장과 같은 비밀번호로 확인한 뒤 wiki/ 파일을 지우는 커밋을 만든다.
@@ -12,6 +21,8 @@ const PROTECTED = [CONFIG.frontPage];
 export async function POST(request) {
   const auth = await readAuthorized(request);
   if ('error' in auth) return auth.error;
+  const blocked = await guardProtection(auth.body.title, auth.admin, 'delete');
+  if (blocked) return blocked;
   const { title, reason, author, baseSha } = auth.body;
 
   if (PROTECTED.includes(title)) return reply(403, { error: `"${title}" 문서는 삭제할 수 없습니다.` });

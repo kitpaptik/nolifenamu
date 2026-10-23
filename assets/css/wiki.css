@@ -415,6 +415,27 @@ h6.wiki-heading {
   }
 }
 
+.protect-levels {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.protect-levels legend {
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+.protect-levels label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
 .delete-confirm {
   display: flex;
   align-items: center;

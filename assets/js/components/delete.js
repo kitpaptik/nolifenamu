@@ -3,7 +3,7 @@ import { fetchSource, forgetSource } from '../store.js';
 import { isConfigured, deleteFileUrl } from '../github.js';
 import { callApi, savedCredentials, rememberCredentials, forgetPassword } from '../api.js';
 import { escapeHtml as esc, docHref, routeHref, storage, toast, gitBlobSha } from '../utils.js';
-import { pageHeader } from './viewer.js';
+import { pageHeader, protectionNotice } from './viewer.js';
 
 /**
  * 문서 삭제. 저장과 같은 크루 비밀번호로 /api/delete 서버 함수가 삭제 커밋을 만든다.
@@ -24,6 +24,7 @@ export async function renderDelete(view, title) {
   }
 
   view.innerHTML = `${head}
+      ${protectionNotice(title, 'delete')}
       <div class="notice warn">
         <b>${esc(title)}</b> 문서를 삭제합니다. 삭제해도 기록은 남아서
         <a href="${routeHref('history', title)}">역사</a>에서 이전 판을 보고 내용을 복사해 다시 만들 수 있습니다.

@@ -22,7 +22,8 @@ export const forgetPassword = () => storage.remove(PASSWORD_KEY);
  * 서버 함수가 없는 환경(로컬 미리보기, GitHub Pages)이면 null을 돌려준다.
  * @param {string} name 예: 'save'
  * @param {Record<string, unknown>} body
- * @returns {Promise<{ ok: boolean, status: number, data: { error?: string, gone?: boolean } } | null>}
+ * @returns {Promise<{ ok: boolean, status: number,
+ *   data: { error?: string, gone?: boolean, protection?: import('./store.js').Protection | null } } | null>}
  */
 export async function callApi(name, body) {
   /** @type {Response} */

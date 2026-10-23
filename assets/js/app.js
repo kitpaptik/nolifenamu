@@ -6,13 +6,14 @@
  *   #/recent[?type=A|D]  #/all  #/random  #/new  #/search?q=
  */
 import { CONFIG } from './config.js';
-import { loadIndex, getIndex, allTitles } from './store.js';
+import { loadIndex, loadProtection, getIndex, allTitles } from './store.js';
 import { storage, docHref } from './utils.js';
 import { mountSearch, renderSearch } from './components/search.js';
 import { renderSidebar } from './components/sidebar.js';
 import { renderDocument } from './components/viewer.js';
 import { renderEditor } from './components/editor.js';
 import { renderDelete } from './components/delete.js';
+import { renderProtect } from './components/protect.js';
 import { renderHistory } from './components/history.js';
 import { hideFootnote } from './components/footnote.js';
 import {
@@ -101,6 +102,10 @@ async function route() {
         setTitle(`${arg} (삭제)`);
         await renderDelete(view, arg);
         break;
+      case 'protect':
+        setTitle(`${arg} (보호)`);
+        await renderProtect(view, arg);
+        break;
       case 'history':
         setTitle(`${arg} (역사)`);
         renderHistory(view, arg);
@@ -183,7 +188,7 @@ async function init() {
   setupTheme();
   setupAnchors();
   mountSearch(/** @type {HTMLFormElement} */ (document.getElementById('header-search')));
-  await loadIndex();
+  await Promise.all([loadIndex(), loadProtection()]);
   renderSidebar(sidebar);
   window.addEventListener('hashchange', route);
   await route();

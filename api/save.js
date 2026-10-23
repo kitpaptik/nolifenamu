@@ -1,4 +1,13 @@
-import { reply, readAuthorized, github, currentSha, contentsPath, authorName, branch } from './_github.js';
+import {
+  reply,
+  readAuthorized,
+  guardProtection,
+  github,
+  currentSha,
+  contentsPath,
+  authorName,
+  branch,
+} from './_github.js';
 
 /**
  * 문서 저장 API (Vercel 서버 함수). 크루 공용 비밀번호를 확인한 뒤
@@ -11,6 +20,8 @@ const MAX_CONTENT = 500_000;
 export async function POST(request) {
   const auth = await readAuthorized(request);
   if ('error' in auth) return auth.error;
+  const blocked = await guardProtection(auth.body.title, auth.admin, 'edit');
+  if (blocked) return blocked;
   const { title, content, summary, author, baseSha } = auth.body;
 
   if (typeof content !== 'string' || content.length > MAX_CONTENT) {

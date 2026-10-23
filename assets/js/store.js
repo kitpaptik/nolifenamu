@@ -30,6 +30,31 @@ let indexPromise = null;
 /** @type {Map<string, Promise<string|null>>} */
 const sourceCache = new Map();
 
+/**
+ * @typedef {{ level: 'edit' | 'delete', reason: string, by: string, date: string }} Protection
+ */
+
+/** @type {Record<string, Protection>} */
+let protection = {};
+
+/** 보호 문서 목록 (protected.json). 없으면 보호 문서가 없는 것으로 본다 */
+export function loadProtection() {
+  return fetch('protected.json', { cache: 'no-cache' })
+    .then((r) => (r.ok ? r.json() : {}))
+    .catch(() => ({}))
+    .then((data) => (protection = data ?? {}));
+}
+
+/** @param {string} title @returns {Protection | null} */
+export const getProtection = (title) => (Object.hasOwn(protection, title) ? protection[title] : null);
+
+/** 방금 바꾼 보호 설정을 재배포 전에도 바로 반영한다 */
+/** @param {string} title @param {Protection | null} entry */
+export function setProtection(title, entry) {
+  if (entry) protection[title] = entry;
+  else delete protection[title];
+}
+
 /** @returns {Promise<WikiIndex>} */
 export function loadIndex() {
   indexPromise ??= fetch(`${CONFIG.wikiDir}/index.json`, { cache: 'no-cache' })

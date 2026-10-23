@@ -35,7 +35,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir _site
-          cp -r index.html CNAME .nojekyll assets wiki files _site/
+          cp -r index.html CNAME .nojekyll protected.json assets wiki files _site/
 
       - uses: actions/configure-pages@v5
 

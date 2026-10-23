@@ -3,7 +3,7 @@ import { CONFIG } from '../config.js';
 import { isConfigured, editFileUrl, newFileUrl } from '../github.js';
 import { callApi, savedCredentials, rememberCredentials, forgetPassword } from '../api.js';
 import { escapeHtml as esc, debounce, storage, toast, formatDate, docHref, gitBlobSha } from '../utils.js';
-import { pageHeader, renderWiki, enhance } from './viewer.js';
+import { pageHeader, renderWiki, enhance, protectionNotice } from './viewer.js';
 
 /** GitHub 새 파일 URL에 내용을 담을 수 있는 대략적인 한도 */
 const MAX_PREFILL_URL = 7000;
@@ -31,6 +31,7 @@ export async function renderEditor(view, title) {
           ? ''
           : '<div class="notice warn"><code>assets/js/config.js</code>에 GitHub 저장소(owner/repo)를 설정하면 바로 GitHub에 저장할 수 있습니다. 지금은 .txt 다운로드만 가능합니다.</div>'
       }
+      ${protectionNotice(title, 'edit')}
       ${hasDraft ? '<div class="notice">임시 저장된 내용을 불러왔습니다. <button type="button" class="btn" data-act="discard">임시 저장 버리기</button></div>' : ''}
       <div class="tabs" role="tablist">
         <button type="button" class="active" data-tab="edit">편집</button>

@@ -481,6 +481,17 @@ select {
   color: inherit;
 }
 
+.page-lock {
+  margin-left: 8px;
+  font-size: 1.2rem;
+  vertical-align: middle;
+  text-decoration: none;
+}
+
+.page-lock:hover {
+  text-decoration: none;
+}
+
 .page-title small {
   font-size: 0.95rem;
   font-weight: 500;

@@ -1,5 +1,5 @@
 import { parse, collectIncludes } from '../parser/namumark.js';
-import { fetchSource, getIndex, pageExists, allTitles } from '../store.js';
+import { fetchSource, getIndex, pageExists, allTitles, getProtection } from '../store.js';
 import { isConfigured, rawUrl } from '../github.js';
 import { escapeHtml as esc, docHref, routeHref, formatDate } from '../utils.js';
 import { bindFootnotes } from './footnote.js';
@@ -60,10 +60,25 @@ const ACTIONS = [
   ['backlink', '🔗 역링크'],
   ['discuss', '💬 토론'],
   ['delete', '🗑️ 삭제'],
+  ['protect', '🔒 보호'],
 ];
 
+export const PROTECTION_LABEL = { edit: '편집 보호', delete: '삭제 보호' };
+
 /**
- * 문서 제목 + 우측 액션 버튼 (편집/역사/역링크/토론/삭제)
+ * 보호 중인 문서의 안내 문구 (보호되지 않았으면 빈 문자열)
+ * @param {string} title @param {'edit' | 'delete'} action 이 화면에서 하려는 일
+ */
+export function protectionNotice(title, action) {
+  const p = getProtection(title);
+  if (!p || (action === 'edit' && p.level !== 'edit')) return '';
+  return `<div class="notice warn">🔒 이 문서는 <b>${PROTECTION_LABEL[p.level]}</b> 중입니다${
+    p.reason ? ` (사유: ${esc(p.reason)})` : ''
+  }. 관리자 비밀번호로만 ${action === 'edit' ? '저장' : '삭제'}할 수 있습니다.</div>`;
+}
+
+/**
+ * 문서 제목 + 우측 액션 버튼 (편집/역사/역링크/토론/삭제/보호). 보호 중이면 제목 옆에 자물쇠
  * @param {string} title
  * @param {string} [subtitle] 제목 옆 작은 글씨 (예: "편집")
  */
@@ -71,8 +86,12 @@ export function pageHeader(title, subtitle) {
   const buttons = ACTIONS.map(
     ([route, label]) => `<a class="btn btn-light" href="${routeHref(route, title)}">${label}</a>`,
   ).join('');
+  const p = getProtection(title);
+  const lock = p
+    ? `<a class="page-lock" href="${routeHref('protect', title)}" title="${PROTECTION_LABEL[p.level]}">🔒</a>`
+    : '';
   return `<div class="page-head">
-    <h1 class="page-title"><a href="${docHref(title)}">${esc(title)}</a>${subtitle ? `<small>(${esc(subtitle)})</small>` : ''}</h1>
+    <h1 class="page-title"><a href="${docHref(title)}">${esc(title)}</a>${lock}${subtitle ? `<small>(${esc(subtitle)})</small>` : ''}</h1>
     <div class="btn-group">${buttons}</div>
   </div>`;
 }
